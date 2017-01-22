@@ -18,7 +18,7 @@ build/slope/%.nc: build/dem/%.tif | build/slope
 	grdmath $@ ATAN PI DIV 180 MUL = $@
 
 build/gradient/%.nc: build/dem/%.tif | build/gradient
-	grdgradient -fg $< -G$@ -A-45 -Nt0.5
+	grdgradient -fg $< -G$@ -A-45 -Nt0.6
 
 build/dem/%.vrt: locations/%.env scripts/dem.sh $(wildcard dem/*.flt) | build/dem
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
@@ -39,8 +39,8 @@ build/roads/%.shp: locations/%.env scripts/roads.sh roads/Trans_RoadSegment.shp 
 build/roads/%.gmt: build/roads/%.shp
 	ogr2ogr -F GMT $@ $<
 
-build/cpt/slope.cpt: | build/cpt
-	makecpt -C'#d1e9ad','#ffeda0','#feb24c','#f03b20','#feb24c','#ffeda0',gray -T0,25,30,35,40,45,50,90 -N > $@
+build/cpt/slope.cpt: Makefile | build/cpt
+	makecpt -Cwhite,'#ffff33','#ff7f00','#e41a1c','#984ea3','#377eb8','#777777' -T0,25,30,35,40,45,50,90 -N > $@
 
 build build/slope build/gradient build/dem build/flowline build/waterbody build/roads build/cpt:
 	mkdir -p $@
