@@ -4,6 +4,9 @@ PNG:=$(patsubst %.ps,%.png,$(PS))
 default: $(PNG)
 .PHONY: default
 
+clean:
+	rm -rf build
+
 %.png: %.ps
 	psconvert -TG -A -P $<
 
@@ -11,12 +14,13 @@ build/%.ps: locations/%.env scripts/slope-map.sh build/slope/%.nc build/gradient
 	$< $(word 2,$^) $@
 
 build/slope/%.nc: build/dem/%.tif | build/slope
-	grdgradient $< -S$@ -D
+	grdgradient -fg $< -S$@ -D
+	grdmath $@ ATAN PI DIV 180 MUL = $@
 
 build/gradient/%.nc: build/dem/%.tif | build/gradient
-	grdgradient $< -G$@ -A-45 -Nt0.5
+	grdgradient -fg $< -G$@ -A-45 -Nt0.5
 
-build/dem/%.vrt: locations/%.env scripts/dem.sh $(wildcard dem/*.img) | build/dem
+build/dem/%.vrt: locations/%.env scripts/dem.sh $(wildcard dem/*.flt) | build/dem
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
 
 %.tif: %.vrt
@@ -30,6 +34,7 @@ build/waterbody/%.gmt: locations/%.env scripts/ogrcrop.sh water/NHDWaterbody.shp
 
 build/roads/%.shp: locations/%.env scripts/roads.sh roads/Trans_RoadSegment.shp roads/Trans_RoadSegment2.shp roads/Trans_RoadSegment3.shp | build/roads
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
+.PRECIOUS: build/roads/%.shp
 
 build/roads/%.gmt: build/roads/%.shp
 	ogr2ogr -F GMT $@ $<
