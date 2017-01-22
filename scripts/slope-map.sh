@@ -4,7 +4,7 @@ set -ex
 
 ps=$1
 
-grdimage bulid/slope/$NAME.nc -Cbuild/cpt/slope.cpt -Ibuild/gradient/$NAME.nc -Baf -B+t"$DISPLAY_NAME" -JM6i -R$XMIN/$XMAX/$YMIN/$YMAX -K > $ps
+grdimage build/slope/$NAME.nc -Cbuild/cpt/slope.cpt -Ibuild/gradient/$NAME.nc -Baf -B+t"$DISPLAY_NAME" -JM6i -Rbuild/dem/$NAME.tif -K > $ps
 grdcontour build/dem/$NAME.tif -C20 -A100 -J -R -K -O >> $ps
 psxy build/flowline/$NAME.gmt -W0.6p,blue -J -R -K -O >> $ps
 psxy build/waterbody/$NAME.gmt -Gblue -J -R -K -O >> $ps
