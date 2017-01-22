@@ -10,23 +10,23 @@ default: $(PNG)
 build/%.ps: locations/%.env scripts/slope-map.sh build/slope/%.nc build/gradient/%.nc build/dem/%.tif build/flowline/%.gmt build/waterbody/%.gmt build/roads/%.gmt build/cpt/slope.cpt | build
 	$< $(word 2,$^) $@
 
-build/slope/%.nc: build/dem/%.flt | build/slope
+build/slope/%.nc: build/dem/%.tif | build/slope
 	grdgradient $< -S$@ -D
 
-build/gradient/%.nc: build/dem/%.flt | build/gradient
+build/gradient/%.nc: build/dem/%.tif | build/gradient
 	grdgradient $< -G$@ -A-45 -Nt0.5
 
 build/dem/%.tif: locations/%.env scripts/dem.sh $(wildcard dem/*.img) | build/dem
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
 
-build/flowline/%.gmt: locations/%.env scripts/flowline.sh water/NHDFlowline.shp | build/flowline
-	$< $(word 2,$^) $@
+build/flowline/%.gmt: locations/%.env scripts/ogrcrop.sh water/NHDFlowline.shp | build/flowline
+	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
 
-build/waterbody/%.gmt: locations/%.env scripts/waterbody.sh water/NHDWaterbody.shp build/waterbody
-	$< $(word 2,$^) $@
+build/waterbody/%.gmt: locations/%.env scripts/ogrcrop.sh water/NHDWaterbody.shp | build/waterbody
+	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
 
 build/roads/%.shp: locations/%.env scripts/roads.sh roads/Trans_RoadSegment.shp roads/Trans_RoadSegment2.shp roads/Trans_RoadSegment3.shp | build/roads
-	$< $(word 2,$^) $@
+	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
 
 build/roads/%.gmt: build/roads/%.shp
 	ogr2ogr -F GMT $@ $<
