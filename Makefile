@@ -16,8 +16,11 @@ build/slope/%.nc: build/dem/%.tif | build/slope
 build/gradient/%.nc: build/dem/%.tif | build/gradient
 	grdgradient $< -G$@ -A-45 -Nt0.5
 
-build/dem/%.tif: locations/%.env scripts/dem.sh $(wildcard dem/*/hdr.adf) | build/dem
+build/dem/%.vrt: locations/%.env scripts/dem.sh $(wildcard dem/*.img) | build/dem
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)
+
+%.tif: %.vrt
+	gdal_translate -of GTiff $< $@
 
 build/flowline/%.gmt: locations/%.env scripts/ogrcrop.sh water/NHDFlowline.shp | build/flowline
 	$< $(word 2,$^) $@ $(wordlist 3,$(words $^),$^)

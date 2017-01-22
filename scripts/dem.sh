@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-set -e
+set -ex
 
 outfile=$1
 shift
 
-gdal_merge.py -o $outfile -ul_lr $XMIN $YMAX $XMAX $YMIN $@
+gdalbuildvrt -te $XMIN $YMIN $XMAX $YMAX $outfile $@
