@@ -1,5 +1,6 @@
-PS:=$(patsubst locations/%.env,build/%.ps,$(wildcard locations/*.env))
+PS:=$(patsubst locations/%.env,build/map/%.ps,$(wildcard locations/*.env))
 PNG:=$(patsubst %.ps,%.png,$(PS))
+TRACKS:=$(patsubst tracks/%.kml,build/tracks/%.gmt,$(shell find tracks -type f -name '*.kml')) 
 
 default: $(PNG)
 .PHONY: default
@@ -10,7 +11,7 @@ clean:
 %.png: %.ps
 	psconvert -TG -A -P $<
 
-build/%.ps: locations/%.env scripts/slope-map.sh build/slope/%.nc build/gradient/%.nc build/dem/%.tif build/flowline/%.gmt build/waterbody/%.gmt build/roads/%.gmt build/cpt/slope.cpt | build
+build/map/%.ps: locations/%.env scripts/slope-map.sh build/slope/%.nc build/gradient/%.nc build/dem/%.tif build/flowline/%.gmt build/waterbody/%.gmt build/roads/%.gmt build/cpt/slope.cpt $(TRACKS) | build/map
 	$< $(word 2,$^) $@
 
 build/slope/%.nc: build/dem/%.tif | build/slope
@@ -42,5 +43,9 @@ build/roads/%.gmt: build/roads/%.shp
 build/cpt/slope.cpt: Makefile | build/cpt
 	makecpt -Cwhite,'#ffff33','#ff7f00','#e41a1c','#984ea3','#377eb8','#777777' -T0,25,30,35,40,45,50,90 -N > $@
 
-build build/slope build/gradient build/dem build/flowline build/waterbody build/roads build/cpt:
+build/tracks/%.gmt: tracks/%.kml
+	mkdir -p $(dir $@)
+	ogr2ogr -F GMT $@ $< Paths
+
+build/map build/slope build/gradient build/dem build/flowline build/waterbody build/roads build/cpt:
 	mkdir -p $@

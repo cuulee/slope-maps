@@ -10,5 +10,10 @@ grdcontour build/dem/$NAME.tif -C20 -A100 -J -R -K -O >> $ps
 psxy build/flowline/$NAME.gmt -W0.6p,$blue -J -R -K -O >> $ps
 psxy build/waterbody/$NAME.gmt -G$blue -J -R -K -O >> $ps
 psxy build/roads/$NAME.gmt -W1p,'#f781bf' -J -R -K -O >> $ps
+if [[ -e build/tracks/$NAME ]]; then
+    for track in build/tracks/$NAME/*; do
+        psxy $track -W2p,'#32CD32' -J -R -K -O >> $ps
+    done
+fi
 psbasemap -Lx5.2i/-0.7i+c$YMIN+w1k -J -R -K -O >> $ps
 psscale -D0i/-0.7i+w3i/0.2i+h -Cbuild/cpt/slope.cpt -G0/60 -By+l"Slope angle" -I -O >> $ps
